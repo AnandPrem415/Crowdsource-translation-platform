@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Crowdsourced Language Translator</title>
+</head>
+<body>
+    <h1>Crowdsourced Language Translator</h1>
+    <form id="translationForm">
+        <label for="source_text">Source Text:</label><br>
+        <input type="text" id="source_text" name="source_text" required><br>
+        <label for="language">Target Language (e.g., 'fr' for French):</label><br>
+        <input type="text" id="language" name="language" required><br><br>
+        <input type="submit" value="Submit Translation">
+    </form>
+
+    <h2>Translations</h2>
+    <ul id="translationsList"></ul>
+
+    <script>
+        document.getElementById('translationForm').onsubmit = async function(event) {
+            event.preventDefault();
+            const formData = new FormData(this);
+            const response = await fetch('/submit', {
+                method: 'POST',
+                body: formData
+            });
+            const result = await response.json();
+            alert(result.message + "\nTranslated Text: " + result.translated_text);
+            loadTranslations();
+        };
+
+        async function loadTranslations() {
+            const response = await fetch('/translations');
+            const translations = await response.json();
+            const translationsList = document.getElementById('translationsList');
+            translationsList.innerHTML = '';
+            translations.forEach(t => {
+                const li = document.createElement('li');
+                li.textContent = `${t.source_text} -> ${t.translated_text} [${t.language}]`;
+                translationsList.appendChild(li);
+            });
+        }
+
+        loadTranslations();
+    </script>
+</body>
+</html>
